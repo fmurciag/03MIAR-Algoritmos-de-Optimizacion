@@ -1,0 +1,91 @@
+import numpy as np
+
+# Convertimos la tabla de actores a un array de NumPy
+tabla_actores = np.array(
+    [
+        [1, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 1, 0, 1, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 1, 1, 0, 0],
+        [0, 1, 0, 1, 0, 0, 0, 1, 0, 0],
+        [1, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 1, 0, 0, 0, 0],
+        [1, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 1, 0, 0, 1, 0],
+        [1, 1, 1, 0, 1, 0, 0, 1, 0, 0],
+        [1, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+        [1, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        [1, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [1, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 1, 0, 0],
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+        [1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        [1, 1, 0, 1, 0, 0, 0, 0, 0, 1],
+        [1, 0, 1, 0, 1, 0, 0, 0, 1, 0],
+        [0, 0, 0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        [1, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+        [1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+    ]
+)
+
+# Función para calcular el número de actores únicos usando NumPy
+def calcular_actores(tomas, tabla_actores):
+    # Utilizamos operaciones de NumPy para calcular la unión de los actores en las tomas
+    actores = np.unique(tabla_actores[tomas].nonzero()[1])
+    return len(actores)
+
+
+mejor_total = float("inf")
+mejor_tomas = None
+
+# Función para obtener combinaciones - mantenemos la misma lógica pero optimizamos con NumPy donde sea posible
+def obtener_combinaciones(tomas, k):
+    if k == 0:
+        return np.array([[]], dtype=int)
+    result = []
+    for i in range(len(tomas)):
+        primera = tomas[i]
+        for subcomb in obtener_combinaciones(tomas[i + 1 :], k - 1):
+            result.append(np.append([primera], subcomb))
+    return result
+
+
+# Función principal para procesar las tomas
+def procesar_tomas(tomas_restantes, tomas_seleccionadas, total_actores, tabla_actores):
+    global mejor_total
+    global mejor_tomas
+
+    if len(tomas_restantes) == 0:
+        if total_actores < mejor_total:
+            mejor_total = total_actores
+            mejor_tomas = tomas_seleccionadas.copy()
+            print(
+                "El menor número de desplazamientos al estudio de actores hasta ahora:",
+                mejor_total * 30,
+            )
+            print("Tomas seleccionadas:", [tomas + 1 for tomas in mejor_tomas])
+        return
+
+    for i in range(len(tomas_restantes)):
+        toma = tomas_restantes[i]
+        nuevas_tomas_seleccionadas = tomas_seleccionadas + [toma]
+        actores = calcular_actores(nuevas_tomas_seleccionadas, tabla_actores)
+        if actores + total_actores < mejor_total:
+            procesar_tomas(
+                tomas_restantes[i + 1 :],
+                nuevas_tomas_seleccionadas,
+                total_actores + actores,
+                tabla_actores,
+            )
+
+
+# Iniciar el procesamiento con NumPy
+procesar_tomas(np.arange(30), [], 0, tabla_actores)

@@ -4,7 +4,7 @@ import numpy as np
 # Toma la tabla de las escenas
 tabla_escenas = np.array(
     [
-        # Toma   1  2  3  4  5  6  7  8  9 10
+        # 1  2  3  4  5  6  7  8  9 10 actor / toma
         [1, 1, 1, 1, 1, 0, 0, 0, 0, 0],  # 1
         [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],  # 2
         [0, 1, 0, 0, 1, 0, 1, 0, 0, 0],  # 3
