@@ -56,9 +56,7 @@ def fitness(individual):
         sum_tomas = np.sum(tabla_escenas[dia, :], axis=0)
         # cuenta cuántos actores tienen al menos una aparición
         actores = np.count_nonzero(sum_tomas)
-        costo += (
-            actores * cost_por_actor_por_dia
-        )  # se multiplica por el costo por actor por día
+        costo += actores * cost_por_actor_por_dia  # se multiplica por el costo por actor por día
     print(f"Costo: {costo} ")
     return (costo,)
 
@@ -67,11 +65,7 @@ def fitness(individual):
 def crossover(ind1, ind2):
     idx = range(len(ind1))
     cross_points = sorted(random.sample(idx, 2))
-    return (
-        ind1[: cross_points[0]]
-        + ind2[cross_points[0] : cross_points[1]]
-        + ind1[cross_points[1] :],
-    )
+    return ind1[: cross_points[0]] + ind2[cross_points[0] : cross_points[1]] + ind1[cross_points[1] :]
 
 
 # Mutación
@@ -91,10 +85,7 @@ def selection(poblacion, fitnesses, num_padres, num_direct_copias):
     padres = [poblacion[int(i)] for i in parents_idx]
     offsprings = (
         padres[:num_direct_copias]
-        + [
-            crossover(padres[i], padres[i + 1])
-            for i in range(num_direct_copias, num_padres - 1, 2)
-        ]
+        + [crossover(padres[i], padres[i + 1]) for i in range(num_direct_copias, num_padres - 1, 2)]
         + [mutate(padres[i]) for i in range(num_direct_copias + 1, num_padres, 2)]
     )
     return offsprings
@@ -132,9 +123,7 @@ def imprimirDetalle(individual):
         # cuenta cuántos actores tienen al menos una aparición
         actors = np.count_nonzero(sum_tomas)
         print(f"Actores: {actors}")
-        costo += (
-            actors * cost_por_actor_por_dia
-        )  # se multiplica por el costo por actor por día
+        costo += actors * cost_por_actor_por_dia  # se multiplica por el costo por actor por día
     print(f"\nCoste: {costo}€")
 
 

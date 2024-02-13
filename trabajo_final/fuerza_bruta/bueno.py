@@ -9,58 +9,46 @@ MAX_TOMAS_POR_DIA = 6
 COSTO_POR_ACTOR_POR_DIA = 30
 N_INTENTOS_MAX = 10
 
-best_total = float("inf")  # Global variable to track the best total number of actors
-best_shots = None  # Global variable to track the best selected shots
+BEST_COST = float("inf")  # Global variable to track the best total number of actors
+BEST_SCHEDULE = np.array([])
 
 
 def get_shot_combinations(remaining_shots, n):
+    """Genera todas las combinaciones posibles de tomas a partir de las tomas restantes."""
     return np.array(list(itertools.combinations(remaining_shots, n)), dtype=int)
 
 
 def calculate_actors_in_shots(shots):
+    """Calcula el número de actores que participan en un conjunto de tomas."""
     return len(np.unique(TABLA_ESCENAS[shots].nonzero()[1]))
 
 
-def process_combination(selected_shots, total_actors):
-    global best_total
-    global best_shots
+def save_posible_best_schedule(selected_shots, total_actors):
+    global BEST_COST
+    global BEST_SCHEDULE
 
-    if total_actors < best_total:
-        best_total = total_actors
-        best_shots = selected_shots
-        print("Cost:", best_total * COSTO_POR_ACTOR_POR_DIA, "€")
-        print(
-            "Session order:",
-            [[shot + 1 for shot in shots] for shots in best_shots],
-        )
+    if total_actors < BEST_COST:
+        BEST_COST = total_actors
+        BEST_SCHEDULE = selected_shots.copy()
+        print_schedule(BEST_SCHEDULE.flatten())
 
 
-def process_shots(remaining_shots, selected_shots, total_actors, attempts):
-    global best_total
-    global best_shots
-    attempts += 1
-
-    if attempts > N_INTENTOS_MAX:
-        raise Exception("Maximum attempts reached")
+def generate_schedule_brute_algorithm(remaining_shots, selected_shots, total_actors):
+    """Ejecuta el algoritmo por fuerza bruta"""
 
     if len(remaining_shots) == 0:
-        process_combination(selected_shots, total_actors)
-        attempts = 0
+        save_posible_best_schedule(selected_shots, total_actors)
         return
 
     shot_combinations = get_shot_combinations(remaining_shots, MAX_TOMAS_POR_DIA)
 
     for shots in shot_combinations:
         actors = calculate_actors_in_shots(shots)
-        new_selected_shots = selected_shots + [shots]
+        new_selected_shots = np.vstack((selected_shots, shots))
         new_total_actors = total_actors + actors
-        new_remaining_shots = [shot for shot in remaining_shots if shot not in shots]
-        process_shots(
-            new_remaining_shots,
-            new_selected_shots,
-            new_total_actors,
-            attempts,
-        )
+        new_remaining_shots = np.array([shot for shot in remaining_shots if shot not in shots])
+
+        generate_schedule_brute_algorithm(new_remaining_shots, new_selected_shots, new_total_actors)
 
 
 def print_schedule(session_order=list(range(N_ESCENAS))):
@@ -96,13 +84,8 @@ def print_schedule(session_order=list(range(N_ESCENAS))):
 
 
 try:
-    intentos = 0
-    array_enteros = np.arange(30)
-    np.random.shuffle(array_enteros)
-    process_shots(array_enteros, [], 0, intentos)
-
+    initial_schedule = np.arange(N_ESCENAS)
+    np.random.shuffle(initial_schedule)
+    generate_schedule_brute_algorithm(initial_schedule, np.empty((0, MAX_TOMAS_POR_DIA), dtype=int), 0)
 except KeyboardInterrupt:
-    print_schedule(np.array(best_shots).flatten())
-except Exception as e:
-    print("Error:", str(e))
-    print_schedule(np.array(best_shots).flatten())
+    print_schedule(BEST_SCHEDULE.flatten())

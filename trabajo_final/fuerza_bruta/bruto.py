@@ -8,18 +8,17 @@ N_ESCENAS, N_ACTORES = TABLA_ESCENAS.shape
 N_DIAS = (N_ESCENAS + 5) // 6
 MAX_TOMAS_POR_DIA = 6
 COSTO_POR_ACTOR_POR_DIA = 30
-N_INTENTOS_MAX = 100
+N_INTENTOS_MAX = 10
 
 mejor_total = float("inf")  # Variable global para rastrear el mejor total de actores
 mejor_tomas = None  # Variable global para rastrear las mejores tomas seleccionadas
 
 
-def procesar_tomas(tomas_restantes, tomas_seleccionadas, total_actores):
+def procesar_tomas(tomas_restantes, tomas_seleccionadas, total_actores, intentos):
     global mejor_total
     global mejor_tomas
-    global intentos
     intentos += 1
-
+    print(intentos)
     if intentos > N_INTENTOS_MAX:
         raise ("Intentos maximos")
     if len(tomas_restantes) == 0:  # Si no hay más tomas restantes
@@ -37,9 +36,7 @@ def procesar_tomas(tomas_restantes, tomas_seleccionadas, total_actores):
         return
 
     # Obtenemos todas las combinaciones posibles de MAX_TOMAS_POR_DIA tomas restantes.
-    combinaciones_tomas = np.array(
-        list(itertools.combinations(tomas_restantes, MAX_TOMAS_POR_DIA)), dtype=int
-    )
+    combinaciones_tomas = np.array(list(itertools.combinations(tomas_restantes, MAX_TOMAS_POR_DIA)), dtype=int)
 
     # Itera sobre las combinaciones de tomas.
     for tomas in combinaciones_tomas:
@@ -55,16 +52,16 @@ def procesar_tomas(tomas_restantes, tomas_seleccionadas, total_actores):
 
         # Realiza una llamada recursiva con las nuevas tomas seleccionadas y restantes.
         procesar_tomas(
-            nuevas_tomas_restantes, nuevas_tomas_seleccionadas, nuevos_total_actores
+            nuevas_tomas_restantes,
+            nuevas_tomas_seleccionadas,
+            nuevos_total_actores,
+            intentos,
         )
 
 
 def print_schedule(session_order=list(range(N_ESCENAS))):
     """Prints the details of the best schedule found in table format."""
-    schedule = [
-        session_order[n : n + MAX_TOMAS_POR_DIA]
-        for n in range(0, len(session_order), MAX_TOMAS_POR_DIA)
-    ]
+    schedule = [session_order[n : n + MAX_TOMAS_POR_DIA] for n in range(0, len(session_order), MAX_TOMAS_POR_DIA)]
     schedule_details = []
 
     print("\n\nCalendario de sesiones:")
@@ -99,7 +96,7 @@ try:
     intentos = 0
     array_enteros = np.arange(30)
     np.random.shuffle(array_enteros)
-    procesar_tomas(array_enteros, [], 0)
+    procesar_tomas(array_enteros, [], 0, intentos)
 
 except KeyboardInterrupt:
     print_schedule(np.array(mejor_tomas).flatten())

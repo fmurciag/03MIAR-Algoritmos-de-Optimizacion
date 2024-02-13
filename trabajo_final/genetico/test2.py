@@ -26,10 +26,7 @@ def calculate_cost(schedule):
 
 def fitness(individual):
     """Calcula la aptitud de un individuo basada en el costo total."""
-    horario = [
-        individual[n : n + MAX_TOMAS_POR_DIA]
-        for n in range(0, N_ESCENAS, MAX_TOMAS_POR_DIA)
-    ]
+    horario = [individual[n : n + MAX_TOMAS_POR_DIA] for n in range(0, N_ESCENAS, MAX_TOMAS_POR_DIA)]
     costo_total = sum(calculate_cost(dia) for dia in horario)
     print(f"Costo: {costo_total} ")
     return (costo_total,)
@@ -67,9 +64,7 @@ def generate_schedule_genetic_algorithm(population_size=500, generations=500):
     population = generate_population(population_size)
     for _ in range(generations):
         fitnesses = [fitness(ind) for ind in population]
-        population = selection(
-            population, fitnesses, population_size // 2, population_size // 4
-        )
+        population = selection(population, fitnesses, population_size // 2, population_size // 4)
     best_session = min(population, key=fitness)
     print_schedule(best_session)
     return best_session
