@@ -7,7 +7,7 @@ TABLA_ESCENAS = np.genfromtxt("trabajo_final/tabla_escenas.csv", delimiter=",")
 N_ESCENAS, N_ACTORES = TABLA_ESCENAS.shape
 N_DIAS = (N_ESCENAS + 5) // 6
 MAX_TOMAS_POR_DIA = 6
-COSTO_POR_ACTOR_POR_DIA = 30
+COSTO_POR_ACTOR_POR_DIA = 1
 # np.random.seed(0)
 # random.seed(0)
 
@@ -33,11 +33,15 @@ def fitness(individual):
 
 
 def crossover(ind1, ind2):
-    """Realiza el cruzamiento entre dos individuos."""
+    """Realiza el cruzamiento entre dos individuos y devuelve el mas prometedor."""
     size = len(ind1)
-    pto1, pto2 = sorted(random.sample(range(size), 2))
-    new_ind = ind1[:pto1] + ind2[pto1:pto2] + ind1[pto2:]
-    return new_ind
+    crossover_point = random.randint(1, size - 1)
+    new_ind1 = ind1[:crossover_point] + ind2[crossover_point:]
+    new_ind2 = ind2[:crossover_point] + ind1[crossover_point:]
+    if fitness(new_ind1) < fitness(new_ind1):
+        return new_ind1
+    else:
+        return new_ind2
 
 
 def mutate(individual):
@@ -66,7 +70,6 @@ def generate_schedule_genetic_algorithm(population_size=500, generations=500):
         fitnesses = [fitness(ind) for ind in population]
         population = selection(population, fitnesses, population_size // 2, population_size // 4)
     best_session = min(population, key=fitness)
-    print_schedule(best_session)
     return best_session
 
 
@@ -104,8 +107,8 @@ def print_schedule(session_order=list(range(N_ESCENAS))):
 
 
 # Ejecución del algoritmo y presentación de resultados
-generate_schedule_genetic_algorithm(population_size=100, generations=1000)
-
+best_session = generate_schedule_genetic_algorithm(population_size=200, generations=20)
+print_schedule(best_session)
 
 # RESULTADOS:
 # Mejor cromosoma: [7, 17, 4, 18, 3, 11, 21, 24, 26, 10, 14, 23, 27, 13, 22, 19, 15, 9, 5, 1, 25, 12, 2, 8, 6, 28, 30, 29, 20, 16]

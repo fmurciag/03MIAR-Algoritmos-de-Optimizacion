@@ -82,4 +82,4 @@ def busqueda_voraz(data):
 TABLA_ESCENAS = np.genfromtxt("trabajo_final/tabla_escenas.csv", delimiter=",")
 sol = busqueda_voraz(TABLA_ESCENAS)
 print("La solución es: ", sol)
-print("con coste: ", evaluar_solucion(sol, TABLA_ESCENAS) * 30)
+print("con coste: ", evaluar_solucion(sol, TABLA_ESCENAS))
