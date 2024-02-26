@@ -28,8 +28,8 @@ def fitness(individual):
     """Calcula la aptitud de un individuo basada en el costo total."""
     horario = [individual[n : n + MAX_TOMAS_POR_DIA] for n in range(0, N_ESCENAS, MAX_TOMAS_POR_DIA)]
     costo_total = sum(calculate_cost(dia) for dia in horario)
-    print(f"Costo: {costo_total} ")
-    return (costo_total,)
+    # print(f"Costo: {costo_total} ")
+    return costo_total
 
 
 def crossover(ind1, ind2):
@@ -38,17 +38,20 @@ def crossover(ind1, ind2):
     crossover_point = random.randint(1, size - 1)
     new_ind1 = ind1[:crossover_point] + ind2[crossover_point:]
     new_ind2 = ind2[:crossover_point] + ind1[crossover_point:]
-    if fitness(new_ind1) < fitness(new_ind1):
+    new_ind1 = mutate(new_ind1)
+    new_ind2 = mutate(new_ind2)
+    if fitness(new_ind1) < fitness(new_ind2):
         return new_ind1
     else:
         return new_ind2
 
 
-def mutate(individual):
-    """Aplica una mutación intercambiando dos elementos aleatorios."""
-    idx1, idx2 = random.sample(range(len(individual)), 2)
-    individual[idx1], individual[idx2] = individual[idx2], individual[idx1]
-    return individual
+def mutate(ind):
+    """Aplica una mutación intercambiando los elementos repetidos por el cruce por valores  aleatorios."""
+    for i in range(len(ind)):
+        if ind.count(ind[i]) > 1:
+            ind[i] = random.choice([valor for valor in range(N_ESCENAS) if valor not in ind])
+    return ind
 
 
 def selection(population, fitnesses, num_parents, num_direct_copies):
@@ -56,10 +59,8 @@ def selection(population, fitnesses, num_parents, num_direct_copies):
     sorted_idx = np.argsort(fitnesses)[:num_parents]
     parents = [population[int(i)] for i in sorted_idx]
     offsprings = parents[:num_direct_copies]
-    for i in range(num_direct_copies, num_parents - 1, 2):
+    for i in range(num_direct_copies, min(num_parents - 1, len(parents) - 1)):  # Ajuste aquí
         offsprings.append(crossover(parents[i], parents[i + 1]))
-    for i in range(num_direct_copies + 1, num_parents, 2):
-        offsprings.append(mutate(parents[i]))
     return offsprings
 
 
